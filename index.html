@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipe Scaler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FCFBF9; --card:#ffffff; --ink:#221A20; --muted:#7a7480; --line:#ece6ea;
+  --berry:#A32B4E; --ochre:#B4762A; --olive:#5F7A4E;
+  --berry-t:#f7e9ee; --ochre-t:#f6ecdd; --olive-t:#eaefe4;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,sans-serif;
+  font-size:16px; line-height:1.5; -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:660px; margin:0 auto; padding:28px 18px 80px}
+h1{font-family:Fraunces,Georgia,serif; font-weight:600; font-size:30px; line-height:1.1; margin:0}
+.lede{color:var(--muted); margin:8px 0 2px; max-width:52ch}
+.how{font-size:13.5px; color:var(--muted); margin:14px 0 0; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff}
+.how b{color:var(--berry); font-weight:600}
+
+/* controls */
+.controls{position:sticky; top:0; z-index:5; background:linear-gradient(var(--paper) 78%, transparent); padding:16px 0 10px; margin-top:14px}
+.search{width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:10px; font:inherit; background:#fff; color:var(--ink)}
+.search::placeholder{color:#b3adb6}
+.chips{display:flex; flex-wrap:wrap; gap:7px; margin-top:10px}
+.chip{border:1px solid var(--line); background:#fff; color:var(--muted); padding:6px 12px; border-radius:999px; font-size:13px; cursor:pointer; font:inherit}
+.chip[aria-pressed="true"]{background:var(--ink); color:#fff; border-color:var(--ink)}
+.chip:focus-visible{outline:2px solid var(--berry); outline-offset:2px}
+
+/* card */
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; margin:12px 0; overflow:hidden}
+.card[open]{border-color:#dcd3da}
+summary{list-style:none; cursor:pointer; padding:16px 16px; display:flex; gap:14px; align-items:flex-start}
+summary::-webkit-details-marker{display:none}
+.s-main{flex:1; min-width:0}
+.s-cat{font-size:11.5px; letter-spacing:.04em; color:var(--muted); text-transform:uppercase}
+.s-title{font-family:Fraunces,Georgia,serif; font-weight:600; font-size:19px; line-height:1.2; margin:2px 0 0}
+.tag-new{display:inline-block; font-family:Inter; font-size:10.5px; font-weight:600; color:#fff; background:var(--berry); border-radius:4px; padding:1px 6px; margin-left:7px; vertical-align:middle; letter-spacing:.02em}
+.s-macros{display:flex; align-items:baseline; gap:12px; margin-top:9px; flex-wrap:wrap}
+.kcal{font-family:Fraunces,Georgia,serif; font-weight:600; font-size:22px; line-height:1}
+.kcal small{font-family:Inter; font-size:11px; font-weight:500; color:var(--muted); margin-left:4px}
+.macs{display:flex; gap:8px}
+.mac{font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+.mac b{font-weight:600; font-variant-numeric:tabular-nums}
+.mac.p b{color:var(--berry)} .mac.c b{color:var(--ochre)} .mac.f b{color:var(--olive)}
+.chev{flex:none; width:22px; height:22px; margin-top:2px; color:#c4bcc4; transition:transform .18s ease}
+.card[open] .chev{transform:rotate(180deg)}
+
+/* body */
+.body{padding:2px 16px 18px; border-top:1px solid var(--line)}
+.scaler{background:#fbf7f9; border:1px solid #f0e4ea; border-radius:12px; padding:13px 13px 15px; margin:14px 0 6px}
+.scaler .lab{font-size:12.5px; color:var(--muted); margin-bottom:8px}
+.scaler .lab b{color:var(--ink); font-weight:600}
+.srow{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.srow .have{font-size:13.5px; color:var(--ink)}
+.qtyin{width:92px; padding:9px 10px; border:1px solid var(--line); border-radius:9px; font:inherit; text-align:right; font-variant-numeric:tabular-nums; background:#fff}
+.unit{font-size:13.5px; color:var(--muted); min-width:26px}
+.selwrap{position:relative; flex:1; min-width:150px}
+.ingsel{width:100%; padding:9px 30px 9px 11px; border:1px solid var(--line); border-radius:9px; font:inherit; background:#fff; color:var(--ink); appearance:none; -webkit-appearance:none}
+.selwrap::after{content:"\25be"; position:absolute; right:11px; top:50%; transform:translateY(-50%); color:#b3adb6; pointer-events:none}
+.qtyin:focus,.ingsel:focus,.search:focus{outline:2px solid var(--berry); outline-offset:1px; border-color:var(--berry)}
+
+.yield{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; flex-wrap:wrap}
+.steppers{display:flex; align-items:center; gap:8px}
+.step{width:32px; height:32px; border:1px solid var(--line); background:#fff; border-radius:8px; font-size:18px; line-height:1; cursor:pointer; color:var(--ink)}
+.step:active{background:#f4eef1}
+.yv{font-size:13.5px; color:var(--muted)}
+.yv b{color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums}
+.reset{background:none; border:none; color:var(--berry); font:inherit; font-size:13px; cursor:pointer; padding:4px 2px}
+.reset:focus-visible{outline:2px solid var(--berry); outline-offset:2px}
+
+.batch{font-size:12.5px; color:var(--muted); margin-top:9px; font-variant-numeric:tabular-nums}
+
+.sec{font-size:12px; color:var(--muted); margin:18px 0 8px; letter-spacing:.02em}
+ul.ings{list-style:none; margin:0; padding:0}
+ul.ings li{display:flex; gap:12px; padding:6px 0; border-bottom:1px dashed #efe9ed; font-size:14.5px}
+ul.ings li:last-child{border-bottom:none}
+.amt{flex:none; min-width:74px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--ink)}
+.amt.taste{color:var(--muted); font-weight:400; font-style:italic}
+.nm{color:#3a333c}
+ol.steps{margin:0; padding-left:0; list-style:none; counter-reset:st}
+ol.steps li{position:relative; padding:0 0 12px 30px; counter-increment:st; font-size:14.5px; color:#3a333c}
+ol.steps li::before{content:counter(st); position:absolute; left:0; top:-1px; width:21px; height:21px; background:var(--berry-t); color:var(--berry); border-radius:6px; font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; font-family:Inter}
+.note{font-size:13.5px; color:var(--muted); font-style:italic; margin-top:12px; padding-left:12px; border-left:2px solid var(--berry-t)}
+
+.empty{color:var(--muted); text-align:center; padding:40px 0; font-size:14.5px}
+footer{color:#a49da8; font-size:12px; margin-top:30px; text-align:center; line-height:1.6}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+@media (max-width:480px){
+  h1{font-size:26px} .amt{min-width:66px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Kitchen scaler</h1>
+    <p class="lede">Your recipe collection, rescaled around whatever you actually have in the fridge — with the macros keeping up.</p>
+    <p class="how">Tap a recipe, then tell it <b>how much of one ingredient you have</b>. Everything else rescales to match. Per-serving calories, protein, carbs and fat stay fixed; the batch size and yield follow the amount.</p>
+  </header>
+
+  <div class="controls">
+    <input class="search" id="search" type="search" placeholder="Search recipes or ingredients" aria-label="Search recipes or ingredients">
+    <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
+  </div>
+
+  <div id="list"></div>
+
+  <footer>
+    Macros are estimates from a standard nutrition table — expect roughly &plusmn;10&ndash;15% depending on your exact products.<br>
+    Whole-unit items (eggs, wraps, drumsticks) round to sensible amounts when you scale.
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   Recipe data, nutrition table, and macro engine.
+   Values in the nutrition table are per 100 g.
+   Each recipe ingredient carries `g` = grams used for the base
+   quantity, so macros scale linearly with any rescale.
+   Macros are estimates (~+/-10-15% depending on your products).
+   ============================================================ */
+
+// per 100 g: [kcal, protein, carb, fat]
+const NUT = {
+  bulgur_dry:[342,12,76,1.3], oat_flour:[404,15,66,9], potato:[87,2,20,0.1],
+  dates:[282,2.5,75,0.4], ladyfinger:[400,9,75,6], wrap:[280,20,30,6],
+  shirataki:[10,0,3,0], corn:[86,3,19,1.2], peas:[81,5,14,0.4], chickpea:[130,7,20,2.5],
+  tofu:[130,15,3,8], egg:[143,12.6,0.7,9.5], tuna:[116,26,0,1], beef_lean:[137,21,0,6],
+  mince_lean:[150,20,0,7], chicken_thigh:[209,18,0,15], chicken_drum:[172,18,0,11],
+  edamame:[122,11,10,5], prawn:[99,24,0,0.3], yogurt:[73,5,4,3], mascarpone:[429,4,4,44],
+  milk:[47,3,5,1.6], protein_powder:[380,75,10,5], cashew:[553,18,30,44], almond:[579,21,22,50],
+  walnut:[654,15,14,65], hemp:[553,32,9,49], cheddar:[402,25,1,33],
+  zucchini:[17,1.2,3,0.3], onion:[40,1,9,0.1], pepper:[31,1,6,0.3], tomato:[18,0.9,3.9,0.2],
+  cucumber:[15,0.7,3.6,0.1], lettuce:[15,1.4,2.9,0.2], mushroom:[22,3,3,0.3],
+  cauliflower:[25,1.9,5,0.3], radish:[16,0.7,3.4,0.1], spring_onion:[32,1.8,7,0.2],
+  greens:[13,1.5,2,0.2], seaweed:[30,4,5,0.3], strawberry:[32,0.7,7.7,0.3],
+  strawberry_fd:[360,4,88,3], grapes:[69,0.7,18,0.2], aubergine:[25,1,6,0.2],
+  blueberry:[57,0.7,14,0.3], parsley:[36,3,6,0.8],
+  olive_oil:[884,0,0,100], oil:[884,0,0,100], sesame_oil:[884,0,0,100], coconut_oil:[862,0,0,100],
+  tomato_paste:[82,4,19,0.5], soy:[53,8,5,0], gochujang:[210,5,45,1], doenjang:[200,12,20,6],
+  miso:[198,12,26,6], maple:[260,0,67,0], sugar:[400,0,100,0], cocoa:[228,20,58,14],
+  sesame_seed:[573,17,23,50], honey:[304,0,82,0], garlic:[149,6,33,0.5], ginger:[80,1.8,18,0.8],
+  lime:[25,0.4,8,0.1], lemon:[22,0.4,7,0.1], neg:[0,0,0,0]
+};
+
+// ingredient shorthand: [displayName, key, qty, unit, grams]
+// qty null => not scalable / to taste. grams used for macro maths.
+function ing(name, key, qty, unit, g){ return {name, key, qty, unit, g}; }
+
+const RECIPES = [
+  { id:"power-bowl", cat:"Mains & Bowls", title:"Gochujang Bulgur Power Bowl",
+    portions:1, anchor:2,
+    ings:[
+      ing("Bulgur (dry)","bulgur_dry",60,"g",60),
+      ing("Water, for the bulgur","neg",180,"ml",0),
+      ing("Firm tofu","tofu",150,"g",150),
+      ing("Egg","egg",1,"ea",50),
+      ing("Shelled edamame","edamame",60,"g",60),
+      ing("Sweet corn","corn",60,"g",60),
+      ing("Cucumber, sliced","cucumber",60,"g",60),
+      ing("Lettuce, torn","lettuce",40,"g",40),
+      ing("Tomato, wedged","tomato",1,"ea",120),
+      ing("Radishes, sliced","radish",40,"g",40),
+      ing("Gochujang","gochujang",15,"g",15),
+      ing("Garlic clove, grated","garlic",1,"clove",3),
+      ing("Soy sauce","soy",5,"g",5),
+      ing("Squeeze of lemon","neg",null,"",0),
+    ],
+    steps:[
+      "Cook the bulgur: combine with the water, boil, cover, drop to low and cook until absorbed. Rest 5 min, then fluff.",
+      "Dry-sear or air-fry the tofu (no oil) until golden on most sides.",
+      "Boil the egg to your liking; blanch the edamame and corn briefly.",
+      "Whisk the dressing, loosening the gochujang with a little water so it pours.",
+      "Build the bowl over the bulgur and spoon the dressing across the top.",
+    ],
+    note:"Eat 2\u20133 hours before training so it doesn't sit heavy." },
+
+  { id:"doenjang-tuna", cat:"Mains & Bowls", title:"Doenjang Tuna & Zucchini Bulgur Bowl",
+    portions:1, anchor:2,
+    ings:[
+      ing("Bulgur (dry)","bulgur_dry",60,"g",60),
+      ing("Water, for the bulgur","neg",180,"ml",0),
+      ing("Canned tuna, drained","tuna",100,"g",100),
+      ing("Zucchini, diced","zucchini",150,"g",150),
+      ing("Onion, finely diced","onion",50,"g",50),
+      ing("Doenjang","doenjang",15,"g",15),
+      ing("Soy sauce","soy",5,"g",5),
+      ing("Olive oil","olive_oil",5,"g",5),
+      ing("Garlic powder","garlic",2,"g",2),
+      ing("Ginger powder","ginger",1,"g",1),
+      ing("Romaine, shredded","lettuce",60,"g",60),
+      ing("Lemon wedge","neg",null,"",0),
+    ],
+    steps:[
+      "Cook the bulgur: boil with the water, cover, low heat until absorbed. Rest 5 min and fluff.",
+      "Saut\u00e9 the onion in the olive oil until soft and just colouring.",
+      "Add the zucchini and cook until tender.",
+      "Loosen the doenjang, soy, garlic and ginger with a splash of water, stir in, then fold through the tuna and warm, breaking it into flakes.",
+      "Serve over the bulgur with romaine alongside and a squeeze of lemon.",
+    ],
+    note:"Doenjang overwrites the tuna smell rather than masking it." },
+
+  { id:"mince-pilaf", cat:"Mains & Bowls", title:"One-Pan Bulgur Pilaf with Lean Mince", isNew:true,
+    portions:3, anchor:0,
+    ings:[
+      ing("Lean minced meat","mince_lean",300,"g",300),
+      ing("Coarse bulgur","bulgur_dry",150,"g",150),
+      ing("Onion, finely chopped","onion",1,"ea",110),
+      ing("Garlic cloves, minced","garlic",2,"clove",6),
+      ing("Red/green pepper, diced","pepper",1,"ea",120),
+      ing("Tomato paste","tomato_paste",15,"g",15),
+      ing("Tomato, grated (optional)","tomato",1,"ea",120),
+      ing("Sweet paprika","neg",5,"g",0),
+      ing("Ground cumin","neg",4,"g",0),
+      ing("Hot stock or water","neg",350,"ml",0),
+      ing("Olive oil","olive_oil",15,"ml",14),
+      ing("Salt","neg",5,"g",0),
+      ing("Black pepper","neg",1,"g",0),
+      ing("Parsley, chopped","parsley",15,"g",15),
+    ],
+    steps:[
+      "Heat the oil and cook the onion until soft, then add the garlic and pepper for a couple of minutes.",
+      "Add the mince, breaking it up, and cook until no pink remains and any liquid has cooked off.",
+      "Stir in the tomato paste, paprika and cumin and cook 1 min, then add the grated tomato and cook down 2 min.",
+      "Stir in the bulgur and toast 1 min. Pour in the hot stock, add salt and pepper, stir once to level.",
+      "Cover and cook on the lowest heat until the liquid is absorbed (about 15 min).",
+      "Off the heat, leave covered 10 min. Fluff and scatter over the parsley.",
+    ],
+    note:"Coarse bulgur wants roughly 2\u20132.5\u00d7 its weight in liquid. The covered rest is what makes it fluffy, not gummy." },
+
+  { id:"taco-wraps", cat:"Mains & Bowls", title:"Crispy Air Fryer Taco Wraps",
+    portions:4, anchor:0,
+    ings:[
+      ing("Lean minced beef","beef_lean",500,"g",500),
+      ing("Large high-protein wraps","wrap",4,"ea",200),
+      ing("Cheddar, grated","cheddar",120,"g",120),
+      ing("Onion, finely chopped","onion",1,"ea",110),
+      ing("Garlic cloves, minced","garlic",2,"clove",6),
+      ing("Olive oil","olive_oil",1,"tbsp",14),
+      ing("Tomato paste","tomato_paste",2,"tbsp",32),
+      ing("Water","neg",100,"ml",0),
+      ing("Smoked paprika","neg",2,"tsp",0),
+      ing("Ground cumin","neg",2,"tsp",0),
+      ing("Dried oregano","neg",1,"tsp",0),
+      ing("Chilli powder/flakes","neg",1,"tsp",0),
+      ing("Salt","neg",1,"tsp",0),
+      ing("Black pepper","neg",0.5,"tsp",0),
+    ],
+    steps:[
+      "Soften the onion in the oil for 3\u20134 min, adding the garlic for the last 30 seconds.",
+      "Add the beef, break it up and cook until no pink remains and the liquid has evaporated.",
+      "Stir in the spices, salt and pepper, then the tomato paste, and cook 1 min.",
+      "Pour in the water and simmer until thick and glossy. Cool a few minutes \u2014 dry filling is what lets the wrap crisp.",
+      "Cut a slit from the centre of each wrap to one edge; spread beef and cheddar across the four quadrants and fold into a stacked triangle.",
+      "Air-fry at ~180\u2013190\u00b0C for 8\u201310 min, flipping halfway, until golden and crisp.",
+    ],
+    note:"The folded quarter-wrap crisps better than a fried shell, and lean beef keeps the filling from going soggy." },
+
+  { id:"airfryer-thighs", cat:"Mains & Bowls", title:"Air Fryer Chicken Thighs with Zucchini",
+    portions:2, anchor:0,
+    ings:[
+      ing("Chicken thighs (skin-on)","chicken_thigh",4,"ea",520),
+      ing("Zucchini, half-moons","zucchini",2,"ea",400),
+      ing("Olive oil","olive_oil",1,"tbsp",14),
+      ing("Sweet paprika","neg",2,"tsp",0),
+      ing("Garlic powder","garlic",1,"tsp",2),
+      ing("Dried oregano","neg",1,"tsp",0),
+      ing("Romaine, torn","lettuce",200,"g",200),
+      ing("Cherry tomatoes, halved","tomato",150,"g",150),
+      ing("Lemon juice","neg",null,"",0),
+      ing("Olive oil (salad)","olive_oil",1,"tbsp",14),
+      ing("Greek yogurt (optional dip)","yogurt",100,"g",100),
+      ing("Garlic clove (dip)","garlic",1,"clove",3),
+    ],
+    steps:[
+      "Pat the thighs very dry. Rub with the oil, paprika, garlic powder, oregano, salt and pepper.",
+      "Air-fry at 200\u00b0C, skin-side up, for about 25 min total.",
+      "With about 12 min left, add the zucchini (tossed in a little oil) to the basket.",
+      "Dress the romaine and tomatoes with lemon and olive oil; mix the yogurt-garlic dip if using.",
+      "Rest a few minutes and serve with warmed wraps or bulgur.",
+    ],
+    note:"Pat dry for crisp skin and don't crowd the basket." },
+
+  { id:"drumsticks-traybake", cat:"Mains & Bowls", title:"Baked Chicken Drumsticks with Bulgur & Veg",
+    portions:4, anchor:1,
+    ings:[
+      ing("Chicken drumsticks","chicken_drum",8,"ea",960),
+      ing("Coarse bulgur","bulgur_dry",250,"g",250),
+      ing("Aubergine, cubed","aubergine",1,"ea",250),
+      ing("Zucchini, half-moons","zucchini",2,"ea",400),
+      ing("Tomatoes, chopped","tomato",4,"ea",480),
+      ing("Onion, chopped","onion",1,"ea",110),
+      ing("Garlic cloves, minced","garlic",3,"clove",9),
+      ing("Tomato paste","tomato_paste",2,"tbsp",32),
+      ing("Olive oil","olive_oil",4,"tbsp",56),
+      ing("Ground cumin","neg",2,"tsp",0),
+      ing("Sweet paprika","neg",2,"tsp",0),
+      ing("Ground cinnamon","neg",0.5,"tsp",0),
+      ing("Hot stock","neg",500,"ml",0),
+      ing("Salt","neg",1.5,"tsp",0),
+      ing("Black pepper","neg",0.5,"tsp",0),
+      ing("Parsley, chopped","parsley",15,"g",15),
+    ],
+    steps:[
+      "Heat oven to 200\u00b0C. Pat drumsticks dry. Mix half the oil with the spices; rub two-thirds over the drumsticks.",
+      "Salt the aubergine in a colander and leave to drain ~10 min.",
+      "Soften the onion and garlic in the remaining oil, stir in the tomato paste and cook 1 min.",
+      "Scatter in the bulgur; add zucchini, drained aubergine and tomatoes; pour over the stock and level.",
+      "Nestle drumsticks on top, skin-side up. Cover with foil and bake 30 min.",
+      "Uncover and bake 15\u201320 min more until skin is crisp and bulgur tender. Rest, fluff, add parsley.",
+    ],
+    note:"Drumsticks sit above the bulgur so the fat drips down and flavours the grain." },
+
+  { id:"potato-tofu-salad", cat:"Salads", title:"Warm Potato & Crispy Tofu Salad",
+    portions:2, anchor:0,
+    ings:[
+      ing("Boiled potatoes","potato",400,"g",400),
+      ing("Firm tofu, cubed","tofu",200,"g",200),
+      ing("Shelled edamame","edamame",120,"g",120),
+      ing("Sweet corn","corn",120,"g",120),
+      ing("Cucumber","cucumber",150,"g",150),
+      ing("Lettuce, torn","lettuce",80,"g",80),
+      ing("Neutral oil, for frying","oil",1,"tbsp",14),
+      ing("Soy sauce","soy",2,"tbsp",32),
+      ing("Toasted sesame oil","sesame_oil",1,"tbsp",14),
+      ing("Lime juice","lime",2,"tbsp",30),
+      ing("Maple syrup or honey","maple",1,"tsp",7),
+      ing("Garlic clove, grated","garlic",1,"clove",3),
+      ing("Ginger, grated","ginger",1,"tsp",5),
+      ing("Toasted sesame seeds","sesame_seed",1,"tbsp",9),
+    ],
+    steps:[
+      "Pat the tofu dry and fry in the oil over medium-high until golden. Set aside.",
+      "Blanch edamame and corn a couple of minutes, drain.",
+      "Whisk the dressing until smooth \u2014 tangy, salty, slightly sweet.",
+      "Toss warm potatoes, tofu, edamame, corn, cucumber and lettuce with the dressing; finish with sesame seeds.",
+    ],
+    note:"Warm potatoes and crisp tofu against cool cucumber is the heart of it." },
+
+  { id:"nocook-salad", cat:"Salads", title:"No-Cook Tofu & Chickpea Salad",
+    portions:2, anchor:1,
+    ings:[
+      ing("Firm tofu, cubed","tofu",200,"g",200),
+      ing("Canned chickpeas, drained","chickpea",240,"g",240),
+      ing("Cauliflower, thin-sliced","cauliflower",150,"g",150),
+      ing("Mushrooms, thin-sliced","mushroom",100,"g",100),
+      ing("Canned sweet corn","corn",100,"g",100),
+      ing("Cherry tomatoes, halved","tomato",150,"g",150),
+      ing("Cucumber, sliced","cucumber",100,"g",100),
+      ing("Lettuce, torn","lettuce",80,"g",80),
+      ing("Grapes, halved","grapes",60,"g",60),
+      ing("Soy sauce","soy",2,"tbsp",32),
+      ing("Lime juice","lime",2,"tbsp",30),
+      ing("Maple syrup or honey","maple",1,"tsp",7),
+      ing("Garlic clove, grated","garlic",1,"clove",3),
+      ing("Ginger, grated","ginger",1,"tsp",5),
+      ing("Toasted sesame seeds","sesame_seed",1,"tbsp",9),
+    ],
+    steps:[
+      "Whisk the dressing with a splash of water until smooth.",
+      "Toss cauliflower, mushrooms and tofu with half the dressing and let them sit to soften.",
+      "Add chickpeas, corn, tomatoes, cucumber, lettuce and grapes; toss with the rest and finish with sesame seeds.",
+    ],
+    note:"Firm tofu is fine straight from the pack. Marinating the raw cauliflower and mushrooms is what makes them good." },
+
+  { id:"hotpot", cat:"Soups & Hot Pots", title:"Miso-Gochujang Tofu Hot Pot",
+    portions:2, anchor:0,
+    ings:[
+      ing("Firm tofu, cubed","tofu",300,"g",300),
+      ing("Mushrooms, sliced","mushroom",150,"g",150),
+      ing("Zucchini, half-moons","zucchini",150,"g",150),
+      ing("Cauliflower florets","cauliflower",150,"g",150),
+      ing("Leafy greens","greens",100,"g",100),
+      ing("Spring onions","spring_onion",60,"g",60),
+      ing("Shirataki/konjac noodles","shirataki",200,"g",200),
+      ing("Water","neg",800,"ml",0),
+      ing("Miso paste","miso",30,"g",30),
+      ing("Gochujang","gochujang",15,"g",15),
+      ing("Garlic cloves, grated","garlic",2,"clove",6),
+      ing("Ginger, grated","ginger",10,"g",10),
+      ing("Soy sauce","soy",5,"g",5),
+    ],
+    steps:[
+      "Freezer packs: divide tofu and firm veg between bags and freeze flat; keep greens and spring onion for the end.",
+      "Bring the water to a simmer and whisk in gochujang, garlic, ginger and soy.",
+      "Drop a frozen pack into the broth and simmer until tender and heated through.",
+      "Add rinsed noodles and greens for the last couple of minutes.",
+      "Off the heat, slacken the miso in a ladle of broth then stir back in \u2014 never boil miso hard. Scatter spring onions.",
+    ],
+    note:"Konjac noodles keep it low-glycaemic. Swap tofu for prawns or chicken if you like." },
+
+  { id:"gochujang-soup", cat:"Soups & Hot Pots", title:"Gochujang Tofu & Vegetable Soup",
+    portions:2, anchor:0,
+    ings:[
+      ing("Firm tofu, cubed","tofu",200,"g",200),
+      ing("Potatoes, chunked","potato",200,"g",200),
+      ing("Cauliflower florets","cauliflower",150,"g",150),
+      ing("Zucchini, half-moons","zucchini",150,"g",150),
+      ing("Mushrooms, sliced","mushroom",100,"g",100),
+      ing("Frozen green peas","peas",80,"g",80),
+      ing("Dried seaweed, torn","seaweed",5,"g",5),
+      ing("Spring onions","spring_onion",40,"g",40),
+      ing("Gochujang","gochujang",15,"g",15),
+      ing("Garlic cloves, minced","garlic",2,"clove",6),
+      ing("Water","neg",900,"ml",0),
+      ing("Squeeze of lemon","neg",null,"",0),
+      ing("Salt, to taste","neg",null,"",0),
+    ],
+    steps:[
+      "Simmer the potatoes in the water with garlic and gochujang until almost tender.",
+      "Add cauliflower and zucchini and simmer a few minutes.",
+      "Add mushrooms and seaweed \u2014 these bring the umami, so no stock needed.",
+      "Add tofu and peas and warm through.",
+      "Off the heat, add spring onions and lemon; season with salt only now.",
+    ],
+    note:"Staging by cook time keeps everything from turning to mush." },
+
+  { id:"blueberry-pancakes", cat:"Brunch", title:"Blueberry Protein Pancakes with Compote",
+    portions:2, anchor:0,
+    ings:[
+      ing("Oat flour","oat_flour",80,"g",80),
+      ing("Protein powder","protein_powder",30,"g",30),
+      ing("Baking powder","neg",6,"g",0),
+      ing("Large eggs","egg",2,"ea",100),
+      ing("Greek yogurt","yogurt",100,"g",100),
+      ing("Milk","milk",60,"ml",60),
+      ing("Vanilla sugar","sugar",1,"tsp",4),
+      ing("Salt","neg",null,"",0),
+      ing("Blueberries (batter)","blueberry",150,"g",150),
+      ing("Blueberries (compote)","blueberry",200,"g",200),
+      ing("Lemon juice","lemon",1,"tsp",5),
+      ing("Water","neg",2,"tbsp",0),
+    ],
+    steps:[
+      "Compote: simmer the compote blueberries with lemon and water until they burst and go jammy. Set aside.",
+      "Batter: whisk eggs, yogurt, milk and vanilla sugar, then stir in oat flour, protein powder, baking powder and salt. Rest 2\u20133 min.",
+      "Fold the batter blueberries through gently.",
+      "Ladle onto a hot non-stick pan; cook until bubbles form, flip, cook the other side.",
+      "Stack and spoon the warm compote over.",
+    ],
+    note:"No added oil \u2014 a good non-stick pan is enough. Sweetness comes mostly from the fruit." },
+
+  { id:"tiramisu", cat:"Desserts", title:"No-Bake Tiramisu",
+    portions:4, anchor:0,
+    ings:[
+      ing("Mascarpone, cold","mascarpone",250,"g",250),
+      ing("Thick Greek yogurt","yogurt",250,"g",250),
+      ing("Caster sugar","sugar",30,"g",30),
+      ing("Vanilla extract","neg",1,"tsp",0),
+      ing("Fine salt","neg",0.25,"tsp",0),
+      ing("Strong coffee, cooled","neg",200,"ml",0),
+      ing("Savoiardi (ladyfingers)","ladyfinger",90,"g",90),
+      ing("Cocoa powder, to dust","cocoa",2,"tsp",4),
+    ],
+    steps:[
+      "Beat cold mascarpone with sugar, vanilla and salt until smooth, then fold in the yogurt.",
+      "Briefly dip ladyfingers in the cooled coffee \u2014 a quick dip, not a soak \u2014 and lay a layer in the dish.",
+      "Spread over half the cream, repeat biscuits and cream.",
+      "Chill overnight and dust with cocoa before serving.",
+    ],
+    note:"Full-fat mascarpone sets clean; reduced-fat weeps overnight. Use only cold coffee." },
+
+  { id:"cake-cubes", cat:"Desserts", title:"Strawberry Protein Cake Cubes", isNew:true,
+    portions:9, anchor:0,
+    ings:[
+      ing("Soft pitted dates","dates",150,"g",150),
+      ing("Almonds","almond",80,"g",80),
+      ing("Walnuts","walnut",40,"g",40),
+      ing("Cacao powder","cocoa",20,"g",20),
+      ing("Hemp seeds","hemp",20,"g",20),
+      ing("Salt","neg",null,"",0),
+      ing("Firm tofu, drained","tofu",200,"g",200),
+      ing("Cashews, soaked","cashew",60,"g",60),
+      ing("Strawberries","strawberry",150,"g",150),
+      ing("Freeze-dried strawberries","strawberry_fd",15,"g",15),
+      ing("Maple or date syrup","maple",30,"g",30),
+      ing("Coconut oil, melted","coconut_oil",40,"g",40),
+      ing("Vanilla protein powder","protein_powder",15,"g",15),
+      ing("Lemon juice","lemon",1,"tsp",5),
+      ing("Vanilla extract","neg",1,"tsp",0),
+    ],
+    steps:[
+      "Blitz almonds and walnuts to a coarse crumb. Add dates, cacao, hemp and salt and blitz to a sticky dough. Press into a paper-lined ~15 cm tin and freeze.",
+      "If not soaked, cover the cashews with boiling water 15 min, then drain.",
+      "Blend tofu, cashews, strawberries, freeze-dried strawberries, syrup, protein, lemon and vanilla until silky. With the motor running, pour in the melted coconut oil.",
+      "Pour over the base, smooth, and freeze until firm (3\u20134 h).",
+      "Lift out and cut into cubes with a warm knife. Keep in the fridge (fudgy) or freezer (firmer).",
+    ],
+    note:"Dates and fruit do the sweetening. The coconut oil is what sets the top firm enough to cube." },
+];
+
+// --- macro engine ---
+function macrosFor(key, grams){
+  const n = NUT[key] || NUT.neg;
+  const f = grams/100;
+  return { kcal:n[0]*f, p:n[1]*f, c:n[2]*f, ff:n[3]*f };
+}
+function recipeTotals(r){
+  let t = {kcal:0,p:0,c:0,ff:0};
+  r.ings.forEach(i=>{ const m=macrosFor(i.key,i.g||0); t.kcal+=m.kcal; t.p+=m.p; t.c+=m.c; t.ff+=m.ff; });
+  return t;
+}
+function perServing(r){
+  const t=recipeTotals(r); const s=r.portions||1;
+  return { kcal:t.kcal/s, p:t.p/s, c:t.c/s, ff:t.ff/s };
+}
+
+if (typeof module !== "undefined" && module.exports){
+  module.exports = { NUT, RECIPES, macrosFor, recipeTotals, perServing };
+}
+if (typeof window !== "undefined"){
+  window.NUT = NUT; window.RECIPES = RECIPES;
+  window.macrosFor = macrosFor; window.recipeTotals = recipeTotals; window.perServing = perServing;
+}
+
+</script>
+
+<script>
+(function(){
+  const list = document.getElementById('list');
+  const chipsEl = document.getElementById('chips');
+  const searchEl = document.getElementById('search');
+  const cats = ["All", ...RECIPES.reduce((a,r)=>a.includes(r.cat)?a:[...a,r.cat],[])];
+  let activeCat = "All", query = "";
+  const st = {}; // id -> {factor, anchor}
+  RECIPES.forEach(r=> st[r.id] = {factor:1, anchor:r.anchor||0});
+
+  // chips
+  cats.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='chip'; b.textContent=c; b.setAttribute('aria-pressed', c==="All");
+    b.onclick=()=>{ activeCat=c; [...chipsEl.children].forEach(x=>x.setAttribute('aria-pressed', x.textContent===c)); render(); };
+    chipsEl.appendChild(b);
+  });
+
+  const round = (v)=> Math.round(v*100)/100;
+  function fmt(qty, unit){
+    if(qty==null) return {amt:"to taste", taste:true};
+    let v = qty;
+    let s;
+    if(unit==="g"||unit==="ml"){ s = (v>=20? Math.round(v) : Math.round(v*2)/2) + " " + unit; }
+    else if(unit==="ea"){ s = String(round(v)); }
+    else { s = round(v) + " " + unit; }
+    return {amt:s, taste:false};
+  }
+  function m1(x){ return Math.round(x); }
+
+  function cardHTML(r){
+    const ps = perServing(r);
+    const scal = r.ings.map((i,idx)=>({i,idx})).filter(o=>o.i.qty!=null);
+    const opts = scal.map(o=>`<option value="${o.idx}">${o.i.name}</option>`).join("");
+    const ingLis = r.ings.map((i,idx)=>{
+      return `<li><span class="amt" data-amt="${r.id}:${idx}"></span><span class="nm">${i.name}</span></li>`;
+    }).join("");
+    const stepLis = r.steps.map(s=>`<li>${s}</li>`).join("");
+    const newTag = r.isNew? `<span class="tag-new">New</span>`:"";
+    return `<details class="card" data-id="${r.id}" data-cat="${r.cat}" data-hay="${(r.title+' '+r.ings.map(x=>x.name).join(' ')).toLowerCase().replace(/"/g,'')}">
+      <summary>
+        <div class="s-main">
+          <div class="s-cat">${r.cat}</div>
+          <div class="s-title">${r.title}${newTag}</div>
+          <div class="s-macros">
+            <div class="kcal">${m1(ps.kcal)}<small>kcal / serving</small></div>
+            <div class="macs">
+              <span class="mac p">P&nbsp;<b>${m1(ps.p)}</b></span>
+              <span class="mac c">C&nbsp;<b>${m1(ps.c)}</b></span>
+              <span class="mac f">F&nbsp;<b>${m1(ps.ff)}</b></span>
+            </div>
+          </div>
+        </div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </summary>
+      <div class="body">
+        <div class="scaler">
+          <div class="lab">I have this much of <b>one ingredient</b>:</div>
+          <div class="srow">
+            <input class="qtyin" type="number" min="0" step="any" data-role="qty" aria-label="Amount you have">
+            <span class="unit" data-role="unit"></span>
+            <span class="selwrap"><select class="ingsel" data-role="sel" aria-label="Which ingredient">${opts}</select></span>
+          </div>
+          <div class="yield">
+            <div class="steppers">
+              <button class="step" data-role="minus" aria-label="Fewer servings">&minus;</button>
+              <div class="yv">makes <b data-role="yield"></b> servings</div>
+              <button class="step" data-role="plus" aria-label="More servings">+</button>
+            </div>
+            <button class="reset" data-role="reset">Reset to original</button>
+          </div>
+          <div class="batch" data-role="batch"></div>
+        </div>
+
+        <div class="sec">Ingredients</div>
+        <ul class="ings">${ingLis}</ul>
+        <div class="sec">Method</div>
+        <ol class="steps">${stepLis}</ol>
+        ${r.note? `<div class="note">${r.note}</div>`:""}
+      </div>
+    </details>`;
+  }
+
+  function update(r){
+    const s = st[r.id];
+    const f = s.factor;
+    const el = list.querySelector(`[data-id="${r.id}"]`);
+    if(!el) return;
+    // ingredient amounts
+    r.ings.forEach((i,idx)=>{
+      const span = el.querySelector(`[data-amt="${r.id}:${idx}"]`);
+      if(!span) return;
+      const o = fmt(i.qty==null? null : i.qty*f, i.unit);
+      span.textContent = o.amt;
+      span.classList.toggle('taste', o.taste);
+    });
+    // anchor input + unit
+    const anchor = r.ings[s.anchor];
+    const qtyin = el.querySelector('[data-role="qty"]');
+    const unit = el.querySelector('[data-role="unit"]');
+    const sel = el.querySelector('[data-role="sel"]');
+    sel.value = String(s.anchor);
+    unit.textContent = anchor.unit==="ea" ? "×" : (anchor.unit||"");
+    const val = anchor.qty*f;
+    qtyin.value = (anchor.unit==="g"||anchor.unit==="ml") ? Math.round(val) : round(val);
+    // yield + batch
+    const yield_ = Math.round((r.portions*f)*2)/2;
+    el.querySelector('[data-role="yield"]').textContent = yield_;
+    const t = recipeTotals(r);
+    const b = el.querySelector('[data-role="batch"]');
+    b.innerHTML = `Whole batch: <b>${m1(t.kcal*f)}</b> kcal · ${m1(t.p*f)} g protein · ${m1(t.c*f)} g carbs · ${m1(t.ff*f)} g fat`;
+  }
+
+  function render(){
+    const cards = RECIPES.filter(r=>{
+      if(activeCat!=="All" && r.cat!==activeCat) return false;
+      if(query){ const hay=(r.title+' '+r.ings.map(x=>x.name).join(' ')).toLowerCase(); if(!hay.includes(query)) return false; }
+      return true;
+    });
+    if(!cards.length){ list.innerHTML = `<div class="empty">No recipes match that. Try another ingredient or clear the search.</div>`; return; }
+    list.innerHTML = cards.map(cardHTML).join("");
+    cards.forEach(update);
+  }
+
+  // events (delegated)
+  list.addEventListener('input', e=>{
+    const card = e.target.closest('.card'); if(!card) return;
+    const r = RECIPES.find(x=>x.id===card.dataset.id); const s = st[r.id];
+    if(e.target.dataset.role==="qty"){
+      const anchor = r.ings[s.anchor];
+      const v = parseFloat(e.target.value);
+      if(isFinite(v) && v>0 && anchor.qty>0){ s.factor = v/anchor.qty; update(r); }
+    }
+  });
+  list.addEventListener('change', e=>{
+    const card = e.target.closest('.card'); if(!card) return;
+    const r = RECIPES.find(x=>x.id===card.dataset.id); const s = st[r.id];
+    if(e.target.dataset.role==="sel"){ s.anchor = parseInt(e.target.value,10); update(r); }
+  });
+  list.addEventListener('click', e=>{
+    const card = e.target.closest('.card'); if(!card) return;
+    const r = RECIPES.find(x=>x.id===card.dataset.id); const s = st[r.id];
+    const role = e.target.dataset.role;
+    if(role==="reset"){ e.preventDefault(); s.factor=1; s.anchor=r.anchor||0; update(r); }
+    if(role==="plus"||role==="minus"){
+      e.preventDefault();
+      const per = 1/r.portions;                 // one serving in factor terms
+      let servings = Math.round(r.portions*s.factor) + (role==="plus"?1:-1);
+      if(servings<1) servings=1;
+      s.factor = servings/r.portions; update(r);
+    }
+  });
+  searchEl.addEventListener('input', ()=>{ query = searchEl.value.trim().toLowerCase(); render(); });
+
+  render();
+})();
+</script>
+</body>
+</html>
