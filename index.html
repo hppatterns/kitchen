@@ -35,14 +35,8 @@ h1{font-family:Fraunces,Georgia,serif; font-weight:600; font-size:30px; line-hei
 .chip[aria-pressed="true"]{background:var(--ink); color:#fff; border-color:var(--ink)}
 .chip:focus-visible{outline:2px solid var(--berry); outline-offset:2px}
 
-/* card */
-.card{background:var(--card); border:1px solid var(--line); border-radius:14px; margin:12px 0; overflow:hidden}
-.card[open]{border-color:#dcd3da}
-summary{list-style:none; cursor:pointer; padding:16px 16px; display:flex; gap:14px; align-items:flex-start}
-summary::-webkit-details-marker{display:none}
-.s-main{flex:1; min-width:0}
+/* shared bits reused by the detail view */
 .s-cat{font-size:11.5px; letter-spacing:.04em; color:var(--muted); text-transform:uppercase}
-.s-title{font-family:Fraunces,Georgia,serif; font-weight:600; font-size:19px; line-height:1.2; margin:2px 0 0}
 .tag-new{display:inline-block; font-family:Inter; font-size:10.5px; font-weight:600; color:#fff; background:var(--berry); border-radius:4px; padding:1px 6px; margin-left:7px; vertical-align:middle; letter-spacing:.02em}
 .s-macros{display:flex; align-items:baseline; gap:12px; margin-top:9px; flex-wrap:wrap}
 .kcal{font-family:Fraunces,Georgia,serif; font-weight:600; font-size:22px; line-height:1}
@@ -51,12 +45,57 @@ summary::-webkit-details-marker{display:none}
 .mac{font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums}
 .mac b{font-weight:600; font-variant-numeric:tabular-nums}
 .mac.p b{color:var(--berry)} .mac.c b{color:var(--ochre)} .mac.f b{color:var(--olive)}
-.chev{flex:none; width:22px; height:22px; margin-top:2px; color:#c4bcc4; transition:transform .18s ease}
-.card[open] .chev{transform:rotate(180deg)}
+
+/* recipe grid — tall, narrow, flippable tiles */
+#list{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:4px}
+.empty{grid-column:1/-1}
+.tile{perspective:1100px; cursor:pointer; border-radius:16px}
+.tile:focus-visible{outline:none}
+.tile:focus-visible .face{outline:2px solid var(--berry); outline-offset:2px}
+.tile-inner{position:relative; width:100%; aspect-ratio:3/4; min-height:270px; transition:transform .5s cubic-bezier(.2,.7,.2,1); transform-style:preserve-3d}
+.tile.flipped .tile-inner{transform:rotateY(180deg)}
+.face{position:absolute; inset:0; -webkit-backface-visibility:hidden; backface-visibility:hidden; border:1px solid var(--line); border-radius:16px; overflow:hidden; background:var(--card); display:flex; flex-direction:column}
+.tile:hover .face{border-color:#dcd3da}
+
+/* front */
+.t-img{flex:1; min-height:0; width:100%; background:var(--berry-t); position:relative}
+.t-img img{width:100%; height:100%; object-fit:cover; display:block}
+.t-ph{width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#d7b6c1; background:linear-gradient(140deg,var(--berry-t),var(--ochre-t))}
+.t-ph svg{width:34px; height:34px}
+.flip-hint{position:absolute; top:9px; right:9px; width:25px; height:25px; background:rgba(255,255,255,.9); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--muted); box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.flip-hint svg{width:14px; height:14px}
+.t-foot{padding:10px 12px 13px}
+.t-foot .s-cat{font-size:10.5px}
+.t-name{font-family:Fraunces,Georgia,serif; font-weight:600; font-size:16.5px; line-height:1.18; margin-top:3px; color:var(--ink)}
+
+/* back */
+.face.back{transform:rotateY(180deg); align-items:center; justify-content:center; text-align:center; padding:16px 13px; gap:0; background:linear-gradient(158deg,var(--berry-t) 0%,var(--ochre-t) 100%); border-color:#eddbe0}
+.b-kcal{font-family:Fraunces,Georgia,serif; font-weight:600; font-size:clamp(26px,7vw,34px); line-height:1; color:var(--ink)}
+.b-kcal small{display:block; font-family:Inter; font-size:10.5px; font-weight:500; color:var(--muted); margin-top:4px; letter-spacing:.03em; text-transform:uppercase}
+.b-macs{display:flex; gap:14px; margin-top:12px}
+.b-mac{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em}
+.b-mac b{display:block; font-family:Fraunces,Georgia,serif; font-size:17px; font-weight:600; margin-top:2px; font-variant-numeric:tabular-nums}
+.b-mac.p b{color:var(--berry)} .b-mac.c b{color:var(--ochre)} .b-mac.f b{color:var(--olive)}
+.b-rec{margin-top:15px; font-size:12px; color:#3a333c; background:var(--olive-t); border-radius:999px; padding:6px 13px; line-height:1.25; max-width:100%}
+.b-rec span{color:var(--olive); font-weight:600; text-transform:uppercase; font-size:10px; letter-spacing:.04em; margin-right:3px}
+.view{margin-top:16px; background:var(--ink); color:#fff; border:none; border-radius:9px; padding:9px 15px; font:inherit; font-size:13px; font-weight:500; cursor:pointer}
+.view:hover{background:#000}
+.view:focus-visible{outline:2px solid var(--berry); outline-offset:2px}
+
+/* detail view */
+#detailView{margin-top:8px}
+.back{display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--berry); font:inherit; font-size:14px; font-weight:500; cursor:pointer; padding:8px 2px; margin:6px 0 4px}
+.back:focus-visible{outline:2px solid var(--berry); outline-offset:2px; border-radius:6px}
+.back svg{width:16px; height:16px}
+.d-cat{font-size:11.5px; letter-spacing:.04em; color:var(--muted); text-transform:uppercase; margin-top:6px}
+.d-title{font-family:Fraunces,Georgia,serif; font-weight:600; font-size:26px; line-height:1.15; margin:3px 0 0}
+.hero{width:100%; max-height:300px; object-fit:cover; border-radius:14px; margin:14px 0 4px; display:block; border:1px solid var(--line)}
+.d-macros{display:flex; align-items:baseline; gap:12px; margin-top:12px; flex-wrap:wrap}
+.d-rec{display:inline-block; margin-top:12px; font-size:12.5px; color:#3a333c; background:var(--olive-t); border-radius:999px; padding:6px 13px}
+.d-rec span{color:var(--olive); font-weight:600; text-transform:uppercase; font-size:10px; letter-spacing:.04em; margin-right:4px}
 
 /* body */
-.body{padding:2px 16px 18px; border-top:1px solid var(--line)}
-.scaler{background:#fbf7f9; border:1px solid #f0e4ea; border-radius:12px; padding:13px 13px 15px; margin:14px 0 6px}
+.scaler{background:#fbf7f9; border:1px solid #f0e4ea; border-radius:12px; padding:13px 13px 15px; margin:16px 0 6px}
 .scaler .lab{font-size:12.5px; color:var(--muted); margin-bottom:8px}
 .scaler .lab b{color:var(--ink); font-weight:600}
 .srow{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
@@ -96,7 +135,7 @@ footer{color:#a49da8; font-size:12px; margin-top:30px; text-align:center; line-h
 
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 @media (max-width:480px){
-  h1{font-size:26px} .amt{min-width:66px}
+  h1{font-size:26px} .amt{min-width:66px} .d-title{font-size:23px}
 }
 </style>
 </head>
@@ -105,15 +144,23 @@ footer{color:#a49da8; font-size:12px; margin-top:30px; text-align:center; line-h
   <header>
     <h1>Kitchen scaler</h1>
     <p class="lede">Your recipe collection, rescaled around whatever you actually have in the fridge — with the macros keeping up.</p>
-    <p class="how">Tap a recipe, then tell it <b>how much of one ingredient you have</b>. Everything else rescales to match. Per-serving calories, protein, carbs and fat stay fixed; the batch size and yield follow the amount.</p>
+    <p class="how">Tap a card to <b>flip it</b> for the per-serving macros and when it's best eaten, then hit <b>View recipe</b> to open the method and the scaler — tell it how much of one ingredient you have and everything rescales to match.</p>
   </header>
 
-  <div class="controls">
+  <div class="controls" id="controls">
     <input class="search" id="search" type="search" placeholder="Search recipes or ingredients" aria-label="Search recipes or ingredients">
     <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
   </div>
 
   <div id="list"></div>
+
+  <div id="detailView" hidden>
+    <button class="back" id="backBtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      All recipes
+    </button>
+    <div id="detail"></div>
+  </div>
 
   <footer>
     Macros are estimates from a standard nutrition table — expect roughly &plusmn;10&ndash;15% depending on your exact products.<br>
@@ -133,13 +180,13 @@ footer{color:#a49da8; font-size:12px; margin-top:30px; text-align:center; line-h
 // per 100 g: [kcal, protein, carb, fat]
 const NUT = {
   bulgur_dry:[342,12,63.4,3.3], oat_flour:[400,13.3,60,6.7], potato_raw:[77,2.1,15.4,0.1],
-  dates:[282,2.5,66.9,0.4], tofu:[126,13,0,7.9], egg:[155,12.6,1.1,10.6], canned_tuna:[98,23,0.3,0.6], 
+  dates:[282,2.5,66.9,0.4], tofu:[126,13,0,7.9], egg:[155,12.6,1.1,10.6], canned_tuna:[98,23,0.3,0.6],
   mince_lean:[140,20,0.5,6.4], chicken_thigh_withskin:[239,28.2,0,13.2], chicken_drum_withskin:[206,27.3,0,10],
   edamame:[121,11.9,3.6,5.2], prawn:[99,24,0.2,0.3], greek_yogurt:[126,4,4.9,10.4], mascarpone:[431,2.9,4.6,45.6],
   plain_oatmilk:[42,0.8,7.6,0.8], protein_powder:[343.3,77,7.7,2.3], cashew:[533,17.4,32.1,38.9], almond:[584,21.5,9,51.1],
   walnut:[679,14.6,5.5,69.7], hemp:[526,24.8,0,35.5], cheddar:[403,22.9,3.4,33.4],
   zucchini:[17,1.2,2.1,0.3], onion:[40,1.1,7.7,0.1], pepper:[27,0.8,5.5,0.1], tomato:[18,0.9,2.7,0.2],
-  cucumber:[14,0.6,1.7,0.2], 
+  cucumber:[14,0.6,1.7,0.2],
   lettuce:[15,1.4,2.9,0.2], mushroom:[22,3,3,0.3],
   cauliflower:[25,1.9,5,0.3], radish:[16,0.7,3.4,0.1], spring_onion:[32,1.8,7,0.2],
   greens:[13,1.5,2,0.2], seaweed:[30,4,5,0.3], strawberry:[32,0.7,7.7,0.3],
@@ -149,7 +196,7 @@ const NUT = {
   tomato_paste:[82,4,19,0.5], soy:[53,8,5,0], gochujang:[210,5,45,1], doenjang:[200,12,20,6],
   miso:[198,12,26,6], maple:[260,0,67,0], sugar:[400,0,100,0], cocoa:[228,20,58,14],
   sesame_seed:[573,17,23,50], honey:[304,0,82,0], garlic:[149,6,33,0.5], ginger:[80,1.8,18,0.8],
-  lime:[25,0.4,8,0.1], lemon:[22,0.4,7,0.1], 
+  lime:[25,0.4,8,0.1], lemon:[22,0.4,7,0.1],
   beef_lean:[137,21,0,6], ladyfinger:[400,9,75,6], wrap:[280,20,30,6],
   shirataki:[10,0,3,0], corn:[86,3,19,1.2], peas:[81,5,14,0.4], chickpea:[130,7,20,2.5], neg:[0,0,0,0]
 };
@@ -184,9 +231,10 @@ const RECIPES = [
       "Whisk the dressing, loosening the gochujang with a little water so it pours.",
       "Build the bowl over the bulgur and spoon the dressing across the top.",
     ],
-    note:"Eat 2\u20133 hours before training so it doesn't sit heavy." },
+    note:"Eat 2–3 hours before training so it doesn't sit heavy." },
 
   { id:"Gochujang-tuna", cat:"Mains & Bowls", title:"Gochujang Tuna & Zucchini Bulgur Bowl",
+    img:"images/gochujang-tuna.jpg",
     portions:1, anchor:2,
     ings:[
       ing("Bulgur (dry)","bulgur_dry",60,"g",60),
@@ -204,7 +252,7 @@ const RECIPES = [
     ],
     steps:[
       "Cook the bulgur: boil with the water, cover, low heat until absorbed. Rest 5 min and fluff.",
-      "Saut\u00e9 the onion in the olive oil until soft and just colouring.",
+      "Sauté the onion in the olive oil until soft and just colouring.",
       "Add the zucchini and cook until tender.",
       "Loosen the Gochujang, soy, garlic and ginger with a splash of water, stir in, then fold through the tuna and warm, breaking it into flakes.",
       "Serve over the bulgur with romaine alongside and a squeeze of lemon.",
@@ -237,9 +285,10 @@ const RECIPES = [
       "Cover and cook on the lowest heat until the liquid is absorbed (about 15 min).",
       "Off the heat, leave covered 10 min. Fluff and scatter over the parsley.",
     ],
-    note:"Coarse bulgur wants roughly 2\u20132.5\u00d7 its weight in liquid. The covered rest is what makes it fluffy, not gummy." },
+    note:"Coarse bulgur wants roughly 2–2.5× its weight in liquid. The covered rest is what makes it fluffy, not gummy." },
 
   { id:"taco-wraps", cat:"Mains & Bowls", title:"Crispy Air Fryer Taco Wraps",
+    img:"images/taco-wraps.jpg",
     portions:4, anchor:0,
     ings:[
       ing("Lean minced beef","beef_lean",500,"g",500),
@@ -258,12 +307,12 @@ const RECIPES = [
       ing("Black pepper","neg",0.5,"tsp",0),
     ],
     steps:[
-      "Soften the onion in the oil for 3\u20134 min, adding the garlic for the last 30 seconds.",
+      "Soften the onion in the oil for 3–4 min, adding the garlic for the last 30 seconds.",
       "Add the beef, break it up and cook until no pink remains and the liquid has evaporated.",
       "Stir in the spices, salt and pepper, then the tomato paste, and cook 1 min.",
-      "Pour in the water and simmer until thick and glossy. Cool a few minutes \u2014 dry filling is what lets the wrap crisp.",
+      "Pour in the water and simmer until thick and glossy. Cool a few minutes — dry filling is what lets the wrap crisp.",
       "Cut a slit from the centre of each wrap to one edge; spread beef and cheddar across the four quadrants and fold into a stacked triangle.",
-      "Air-fry at ~180\u2013190\u00b0C for 8\u201310 min, flipping halfway, until golden and crisp.",
+      "Air-fry at ~180–190°C for 8–10 min, flipping halfway, until golden and crisp.",
     ],
     note:"The folded quarter-wrap crisps better than a fried shell, and lean beef keeps the filling from going soggy." },
 
@@ -285,7 +334,7 @@ const RECIPES = [
     ],
     steps:[
       "Pat the thighs very dry. Rub with the oil, paprika, garlic powder, oregano, salt and pepper.",
-      "Air-fry at 200\u00b0C, skin-side up, for about 25 min total.",
+      "Air-fry at 200°C, skin-side up, for about 25 min total.",
       "With about 12 min left, add the zucchini (tossed in a little oil) to the basket.",
       "Dress the romaine and tomatoes with lemon and olive oil; mix the yogurt-garlic dip if using.",
       "Rest a few minutes and serve with warmed wraps or bulgur.",
@@ -313,12 +362,12 @@ const RECIPES = [
       ing("Parsley, chopped","parsley",15,"g",15),
     ],
     steps:[
-      "Heat oven to 200\u00b0C. Pat drumsticks dry. Mix half the oil with the spices; rub two-thirds over the drumsticks.",
+      "Heat oven to 200°C. Pat drumsticks dry. Mix half the oil with the spices; rub two-thirds over the drumsticks.",
       "Salt the aubergine in a colander and leave to drain ~10 min.",
       "Soften the onion and garlic in the remaining oil, stir in the tomato paste and cook 1 min.",
       "Scatter in the bulgur; add zucchini, drained aubergine and tomatoes; pour over the stock and level.",
       "Nestle drumsticks on top, skin-side up. Cover with foil and bake 30 min.",
-      "Uncover and bake 15\u201320 min more until skin is crisp and bulgur tender. Rest, fluff, add parsley.",
+      "Uncover and bake 15–20 min more until skin is crisp and bulgur tender. Rest, fluff, add parsley.",
     ],
     note:"Drumsticks sit above the bulgur so the fat drips down and flavours the grain." },
 
@@ -343,7 +392,7 @@ const RECIPES = [
     steps:[
       "Pat the tofu dry and fry in the oil over medium-high until golden. Set aside.",
       "Blanch edamame and corn a couple of minutes, drain.",
-      "Whisk the dressing until smooth \u2014 tangy, salty, slightly sweet.",
+      "Whisk the dressing until smooth — tangy, salty, slightly sweet.",
       "Toss warm potatoes, tofu, edamame, corn, cucumber and lettuce with the dressing; finish with sesame seeds.",
     ],
     note:"Warm potatoes and crisp tofu against cool cucumber is the heart of it." },
@@ -396,7 +445,7 @@ const RECIPES = [
       "Bring the water to a simmer and whisk in gochujang, garlic, ginger and soy.",
       "Drop a frozen pack into the broth and simmer until tender and heated through.",
       "Add rinsed noodles and greens for the last couple of minutes.",
-      "Off the heat, slacken the miso in a ladle of broth then stir back in \u2014 never boil miso hard. Scatter spring onions.",
+      "Off the heat, slacken the miso in a ladle of broth then stir back in — never boil miso hard. Scatter spring onions.",
     ],
     note:"Konjac noodles keep it low-glycaemic. Swap tofu for prawns or chicken if you like." },
 
@@ -420,7 +469,7 @@ const RECIPES = [
     steps:[
       "Simmer the potatoes in the water with garlic and gochujang until almost tender.",
       "Add cauliflower and zucchini and simmer a few minutes.",
-      "Add mushrooms and seaweed \u2014 these bring the umami, so no stock needed.",
+      "Add mushrooms and seaweed — these bring the umami, so no stock needed.",
       "Add tofu and peas and warm through.",
       "Off the heat, add spring onions and lemon; season with salt only now.",
     ],
@@ -444,14 +493,15 @@ const RECIPES = [
     ],
     steps:[
       "Compote: simmer the compote blueberries with lemon and water until they burst and go jammy. Set aside.",
-      "Batter: whisk eggs, yogurt, milk and vanilla sugar, then stir in oat flour, protein powder, baking powder and salt. Rest 2\u20133 min.",
+      "Batter: whisk eggs, yogurt, milk and vanilla sugar, then stir in oat flour, protein powder, baking powder and salt. Rest 2–3 min.",
       "Fold the batter blueberries through gently.",
       "Ladle onto a hot non-stick pan; cook until bubbles form, flip, cook the other side.",
       "Stack and spoon the warm compote over.",
     ],
-    note:"No added oil \u2014 a good non-stick pan is enough. Sweetness comes mostly from the fruit." },
+    note:"No added oil — a good non-stick pan is enough. Sweetness comes mostly from the fruit." },
 
   { id:"tiramisu", cat:"Desserts", title:"No-Bake Tiramisu",
+    img:"images/tiramisu.jpg",
     portions:4, anchor:0,
     ings:[
       ing("Mascarpone, cold","mascarpone",250,"g",250),
@@ -465,7 +515,7 @@ const RECIPES = [
     ],
     steps:[
       "Beat cold mascarpone with sugar, vanilla and salt until smooth, then fold in the yogurt.",
-      "Briefly dip ladyfingers in the cooled coffee \u2014 a quick dip, not a soak \u2014 and lay a layer in the dish.",
+      "Briefly dip ladyfingers in the cooled coffee — a quick dip, not a soak — and lay a layer in the dish.",
       "Spread over half the cream, repeat biscuits and cream.",
       "Chill overnight and dust with cocoa before serving.",
     ],
@@ -494,11 +544,30 @@ const RECIPES = [
       "Blitz almonds and walnuts to a coarse crumb. Add dates, cacao, hemp and salt and blitz to a sticky dough. Press into a paper-lined ~15 cm tin and freeze.",
       "If not soaked, cover the cashews with boiling water 15 min, then drain.",
       "Blend tofu, cashews, strawberries, freeze-dried strawberries, syrup, protein, lemon and vanilla until silky. With the motor running, pour in the melted coconut oil.",
-      "Pour over the base, smooth, and freeze until firm (3\u20134 h).",
+      "Pour over the base, smooth, and freeze until firm (3–4 h).",
       "Lift out and cut into cubes with a warm knife. Keep in the fridge (fudgy) or freezer (firmer).",
     ],
     note:"Dates and fruit do the sweetening. The coconut oil is what sets the top firm enough to cube." },
 ];
+
+// Meal + season recommendation shown on the flipped card.
+// Edit any value here — the text appears verbatim after "Best as".
+const REC = {
+  "power-bowl":        "lunch in summer",
+  "Gochujang-tuna":    "lunch in summer",
+  "mince-pilaf":       "lunch in autumn/winter",
+  "taco-wraps":        "dinner in autumn/winter",
+  "airfryer-thighs":   "lunch in summer",
+  "drumsticks-traybake":"dinner in autumn/winter",
+  "potato-tofu-salad": "lunch in summer",
+  "nocook-salad":      "lunch in summer",
+  "hotpot":            "dinner in autumn/winter",
+  "gochujang-soup":    "lunch in autumn/winter",
+  "blueberry-pancakes":"brunch in summer",
+  "tiramisu":          "dessert in summer",
+  "cake-cubes":        "dessert in summer",
+};
+RECIPES.forEach(r=> r.rec = REC[r.id] || "");
 
 // --- macro engine ---
 function macrosFor(key, grams){
@@ -529,10 +598,16 @@ if (typeof window !== "undefined"){
 <script>
 (function(){
   const list = document.getElementById('list');
+  const detail = document.getElementById('detail');
+  const detailView = document.getElementById('detailView');
+  const controls = document.getElementById('controls');
+  const backBtn = document.getElementById('backBtn');
+  const pageHeader = document.querySelector('header');
   const chipsEl = document.getElementById('chips');
   const searchEl = document.getElementById('search');
   const cats = ["All", ...RECIPES.reduce((a,r)=>a.includes(r.cat)?a:[...a,r.cat],[])];
   let activeCat = "All", query = "";
+  let currentId = null;      // which recipe is open in detail view (null = list)
   const st = {}; // id -> {factor, anchor}
   RECIPES.forEach(r=> st[r.id] = {factor:1, anchor:r.anchor||0});
 
@@ -540,7 +615,7 @@ if (typeof window !== "undefined"){
   cats.forEach(c=>{
     const b=document.createElement('button');
     b.className='chip'; b.textContent=c; b.setAttribute('aria-pressed', c==="All");
-    b.onclick=()=>{ activeCat=c; [...chipsEl.children].forEach(x=>x.setAttribute('aria-pressed', x.textContent===c)); render(); };
+    b.onclick=()=>{ activeCat=c; [...chipsEl.children].forEach(x=>x.setAttribute('aria-pressed', x.textContent===c)); renderList(); };
     chipsEl.appendChild(b);
   });
 
@@ -556,131 +631,201 @@ if (typeof window !== "undefined"){
   }
   function m1(x){ return Math.round(x); }
 
-  function cardHTML(r){
+  function macrosRowHTML(ps, big){
+    const k = big ? 'kcal' : 'kcal';
+    return `<div class="kcal">${m1(ps.kcal)}<small>kcal / serving</small></div>
+      <div class="macs">
+        <span class="mac p">P&nbsp;<b>${m1(ps.p)}</b></span>
+        <span class="mac c">C&nbsp;<b>${m1(ps.c)}</b></span>
+        <span class="mac f">F&nbsp;<b>${m1(ps.ff)}</b></span>
+      </div>`;
+  }
+
+  // ---------- LIST ----------
+  function listCardHTML(r){
     const ps = perServing(r);
-    const scal = r.ings.map((i,idx)=>({i,idx})).filter(o=>o.i.qty!=null);
-    const opts = scal.map(o=>`<option value="${o.idx}">${o.i.name}</option>`).join("");
-    const ingLis = r.ings.map((i,idx)=>{
-      return `<li><span class="amt" data-amt="${r.id}:${idx}"></span><span class="nm">${i.name}</span></li>`;
-    }).join("");
-    const stepLis = r.steps.map(s=>`<li>${s}</li>`).join("");
     const newTag = r.isNew? `<span class="tag-new">New</span>`:"";
-    return `<details class="card" data-id="${r.id}" data-cat="${r.cat}" data-hay="${(r.title+' '+r.ings.map(x=>x.name).join(' ')).toLowerCase().replace(/"/g,'')}">
-      <summary>
-        <div class="s-main">
-          <div class="s-cat">${r.cat}</div>
-          <div class="s-title">${r.title}${newTag}</div>
-          <div class="s-macros">
-            <div class="kcal">${m1(ps.kcal)}<small>kcal / serving</small></div>
-            <div class="macs">
-              <span class="mac p">P&nbsp;<b>${m1(ps.p)}</b></span>
-              <span class="mac c">C&nbsp;<b>${m1(ps.c)}</b></span>
-              <span class="mac f">F&nbsp;<b>${m1(ps.ff)}</b></span>
-            </div>
+    const front = r.img
+      ? `<img src="${r.img}" alt="" loading="lazy">`
+      : `<div class="t-ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3v7a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V3M8 3v18M18 3c-1.7 0-3 2-3 5s1 4 3 4v9"/></svg></div>`;
+    const rec = r.rec
+      ? `<div class="b-rec"><span>Best as</span> ${r.rec}</div>`
+      : "";
+    return `<div class="tile" data-id="${r.id}" tabindex="0" role="button" aria-label="${r.title.replace(/"/g,'')} — tap to flip">
+      <div class="tile-inner">
+        <div class="face front">
+          <div class="t-img">
+            ${front}
+            <div class="flip-hint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg></div>
+          </div>
+          <div class="t-foot">
+            <div class="s-cat">${r.cat}</div>
+            <div class="t-name">${r.title}${newTag}</div>
           </div>
         </div>
-        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-      </summary>
-      <div class="body">
-        <div class="scaler">
-          <div class="lab">I have this much of <b>one ingredient</b>:</div>
-          <div class="srow">
-            <input class="qtyin" type="number" min="0" step="any" data-role="qty" aria-label="Amount you have">
-            <span class="unit" data-role="unit"></span>
-            <span class="selwrap"><select class="ingsel" data-role="sel" aria-label="Which ingredient">${opts}</select></span>
+        <div class="face back">
+          <div class="b-kcal">${m1(ps.kcal)}<small>kcal / serving</small></div>
+          <div class="b-macs">
+            <span class="b-mac p">Protein<b>${m1(ps.p)}</b></span>
+            <span class="b-mac c">Carbs<b>${m1(ps.c)}</b></span>
+            <span class="b-mac f">Fat<b>${m1(ps.ff)}</b></span>
           </div>
-          <div class="yield">
-            <div class="steppers">
-              <button class="step" data-role="minus" aria-label="Fewer servings">&minus;</button>
-              <div class="yv">makes <b data-role="yield"></b> servings</div>
-              <button class="step" data-role="plus" aria-label="More servings">+</button>
-            </div>
-            <button class="reset" data-role="reset">Reset to original</button>
-          </div>
-          <div class="batch" data-role="batch"></div>
+          ${rec}
+          <button class="view" type="button" data-view="${r.id}">View recipe →</button>
         </div>
-
-        <div class="sec">Ingredients</div>
-        <ul class="ings">${ingLis}</ul>
-        <div class="sec">Method</div>
-        <ol class="steps">${stepLis}</ol>
-        ${r.note? `<div class="note">${r.note}</div>`:""}
       </div>
-    </details>`;
+    </div>`;
   }
 
-  function update(r){
-    const s = st[r.id];
-    const f = s.factor;
-    const el = list.querySelector(`[data-id="${r.id}"]`);
-    if(!el) return;
-    // ingredient amounts
-    r.ings.forEach((i,idx)=>{
-      const span = el.querySelector(`[data-amt="${r.id}:${idx}"]`);
-      if(!span) return;
-      const o = fmt(i.qty==null? null : i.qty*f, i.unit);
-      span.textContent = o.amt;
-      span.classList.toggle('taste', o.taste);
-    });
-    // anchor input + unit
-    const anchor = r.ings[s.anchor];
-    const qtyin = el.querySelector('[data-role="qty"]');
-    const unit = el.querySelector('[data-role="unit"]');
-    const sel = el.querySelector('[data-role="sel"]');
-    sel.value = String(s.anchor);
-    unit.textContent = anchor.unit==="ea" ? "×" : (anchor.unit||"");
-    const val = anchor.qty*f;
-    qtyin.value = (anchor.unit==="g"||anchor.unit==="ml") ? Math.round(val) : round(val);
-    // yield + batch
-    const yield_ = Math.round((r.portions*f)*2)/2;
-    el.querySelector('[data-role="yield"]').textContent = yield_;
-    const t = recipeTotals(r);
-    const b = el.querySelector('[data-role="batch"]');
-    b.innerHTML = `Whole batch: <b>${m1(t.kcal*f)}</b> kcal · ${m1(t.p*f)} g protein · ${m1(t.c*f)} g carbs · ${m1(t.ff*f)} g fat`;
-  }
-
-  function render(){
+  function renderList(){
     const cards = RECIPES.filter(r=>{
       if(activeCat!=="All" && r.cat!==activeCat) return false;
       if(query){ const hay=(r.title+' '+r.ings.map(x=>x.name).join(' ')).toLowerCase(); if(!hay.includes(query)) return false; }
       return true;
     });
     if(!cards.length){ list.innerHTML = `<div class="empty">No recipes match that. Try another ingredient or clear the search.</div>`; return; }
-    list.innerHTML = cards.map(cardHTML).join("");
-    cards.forEach(update);
+    list.innerHTML = cards.map(listCardHTML).join("");
   }
 
-  // events (delegated)
-  list.addEventListener('input', e=>{
-    const card = e.target.closest('.card'); if(!card) return;
-    const r = RECIPES.find(x=>x.id===card.dataset.id); const s = st[r.id];
+  // ---------- DETAIL ----------
+  function detailHTML(r){
+    const ps = perServing(r);
+    const newTag = r.isNew? `<span class="tag-new">New</span>`:"";
+    const hero = r.img ? `<img class="hero" src="${r.img}" alt="${r.title}">` : "";
+    const scal = r.ings.map((i,idx)=>({i,idx})).filter(o=>o.i.qty!=null);
+    const opts = scal.map(o=>`<option value="${o.idx}">${o.i.name}</option>`).join("");
+    const ingLis = r.ings.map((i,idx)=>{
+      return `<li><span class="amt" data-amt="${r.id}:${idx}"></span><span class="nm">${i.name}</span></li>`;
+    }).join("");
+    const stepLis = r.steps.map(s=>`<li>${s}</li>`).join("");
+    return `
+      <div class="d-cat">${r.cat}</div>
+      <h2 class="d-title">${r.title}${newTag}</h2>
+      ${hero}
+      <div class="d-macros s-macros">${macrosRowHTML(ps)}</div>
+      ${r.rec? `<div class="d-rec"><span>Best as</span> ${r.rec}</div>`:""}
+
+      <div class="scaler">
+        <div class="lab">I have this much of <b>one ingredient</b>:</div>
+        <div class="srow">
+          <input class="qtyin" type="number" min="0" step="any" data-role="qty" aria-label="Amount you have">
+          <span class="unit" data-role="unit"></span>
+          <span class="selwrap"><select class="ingsel" data-role="sel" aria-label="Which ingredient">${opts}</select></span>
+        </div>
+        <div class="yield">
+          <div class="steppers">
+            <button class="step" data-role="minus" type="button" aria-label="Fewer servings">&minus;</button>
+            <div class="yv">makes <b data-role="yield"></b> servings</div>
+            <button class="step" data-role="plus" type="button" aria-label="More servings">+</button>
+          </div>
+          <button class="reset" data-role="reset" type="button">Reset to original</button>
+        </div>
+        <div class="batch" data-role="batch"></div>
+      </div>
+
+      <div class="sec">Ingredients</div>
+      <ul class="ings">${ingLis}</ul>
+      <div class="sec">Method</div>
+      <ol class="steps">${stepLis}</ol>
+      ${r.note? `<div class="note">${r.note}</div>`:""}
+    `;
+  }
+
+  // recompute the live values inside the open detail view
+  function update(r){
+    const s = st[r.id];
+    const f = s.factor;
+    if(currentId !== r.id) return;
+    r.ings.forEach((i,idx)=>{
+      const span = detail.querySelector(`[data-amt="${r.id}:${idx}"]`);
+      if(!span) return;
+      const o = fmt(i.qty==null? null : i.qty*f, i.unit);
+      span.textContent = o.amt;
+      span.classList.toggle('taste', o.taste);
+    });
+    const anchor = r.ings[s.anchor];
+    const qtyin = detail.querySelector('[data-role="qty"]');
+    const unit = detail.querySelector('[data-role="unit"]');
+    const sel = detail.querySelector('[data-role="sel"]');
+    if(!qtyin) return;
+    sel.value = String(s.anchor);
+    unit.textContent = anchor.unit==="ea" ? "×" : (anchor.unit||"");
+    const val = anchor.qty*f;
+    qtyin.value = (anchor.unit==="g"||anchor.unit==="ml") ? Math.round(val) : round(val);
+    const yield_ = Math.round((r.portions*f)*2)/2;
+    detail.querySelector('[data-role="yield"]').textContent = yield_;
+    const t = recipeTotals(r);
+    const b = detail.querySelector('[data-role="batch"]');
+    b.innerHTML = `Whole batch: <b>${m1(t.kcal*f)}</b> kcal · ${m1(t.p*f)} g protein · ${m1(t.c*f)} g carbs · ${m1(t.ff*f)} g fat`;
+  }
+
+  function openRecipe(id){
+    const r = RECIPES.find(x=>x.id===id); if(!r) return;
+    currentId = id;
+    detail.innerHTML = detailHTML(r);
+    update(r);
+    pageHeader.hidden = true;   // hide the site header/intro -> feels like its own page
+    controls.hidden = true;
+    list.hidden = true;
+    detailView.hidden = false;
+    window.scrollTo(0,0);
+    requestAnimationFrame(()=>window.scrollTo(0,0));
+    backBtn.focus({preventScroll:true});
+  }
+  function closeRecipe(){
+    currentId = null;
+    detailView.hidden = true;
+    detail.innerHTML = "";
+    pageHeader.hidden = false;
+    controls.hidden = false;
+    list.hidden = false;
+    window.scrollTo(0,0);
+  }
+
+  // ---------- events ----------
+  list.addEventListener('click', e=>{
+    const viewBtn = e.target.closest('.view');
+    if(viewBtn){ e.stopPropagation(); openRecipe(viewBtn.dataset.view); return; }
+    const tile = e.target.closest('.tile'); if(!tile) return;
+    tile.classList.toggle('flipped');
+  });
+  list.addEventListener('keydown', e=>{
+    const tile = e.target.closest('.tile'); if(!tile) return;
+    if(e.target.classList.contains('view')) return;   // let the button handle itself
+    if(e.key==="Enter" || e.key===" "){ e.preventDefault(); tile.classList.toggle('flipped'); }
+  });
+  backBtn.addEventListener('click', closeRecipe);
+
+  detail.addEventListener('input', e=>{
+    if(currentId==null) return;
+    const r = RECIPES.find(x=>x.id===currentId); const s = st[r.id];
     if(e.target.dataset.role==="qty"){
       const anchor = r.ings[s.anchor];
       const v = parseFloat(e.target.value);
       if(isFinite(v) && v>0 && anchor.qty>0){ s.factor = v/anchor.qty; update(r); }
     }
   });
-  list.addEventListener('change', e=>{
-    const card = e.target.closest('.card'); if(!card) return;
-    const r = RECIPES.find(x=>x.id===card.dataset.id); const s = st[r.id];
+  detail.addEventListener('change', e=>{
+    if(currentId==null) return;
+    const r = RECIPES.find(x=>x.id===currentId); const s = st[r.id];
     if(e.target.dataset.role==="sel"){ s.anchor = parseInt(e.target.value,10); update(r); }
   });
-  list.addEventListener('click', e=>{
-    const card = e.target.closest('.card'); if(!card) return;
-    const r = RECIPES.find(x=>x.id===card.dataset.id); const s = st[r.id];
+  detail.addEventListener('click', e=>{
+    if(currentId==null) return;
+    const r = RECIPES.find(x=>x.id===currentId); const s = st[r.id];
     const role = e.target.dataset.role;
     if(role==="reset"){ e.preventDefault(); s.factor=1; s.anchor=r.anchor||0; update(r); }
     if(role==="plus"||role==="minus"){
       e.preventDefault();
-      const per = 1/r.portions;                 // one serving in factor terms
       let servings = Math.round(r.portions*s.factor) + (role==="plus"?1:-1);
       if(servings<1) servings=1;
       s.factor = servings/r.portions; update(r);
     }
   });
-  searchEl.addEventListener('input', ()=>{ query = searchEl.value.trim().toLowerCase(); render(); });
 
-  render();
+  searchEl.addEventListener('input', ()=>{ query = searchEl.value.trim().toLowerCase(); renderList(); });
+
+  renderList();
 })();
 </script>
 </body>
