@@ -201,7 +201,7 @@ const NUT = {
   sesame_seed:[573,17,23,50], tomato_paste:[82,4,19,0.5], soy:[53,8,5,0],
   beef_lean:[137,21,0,6], ladyfinger:[400,9,75,6], doenjang:[200,12,20,6],
   shirataki:[10,0,3,0], corn:[86,3,19,1.2], peas:[81,5,14,0.4], 
-  greens:[13,1.5,2,0.2] neg:[0,0,0,0]
+  greens:[13,1.5,2,0.2], neg:[0,0,0,0]
 };
 
 // ingredient shorthand: [displayName, key, qty, unit, grams]
@@ -209,7 +209,7 @@ const NUT = {
 function ing(name, key, qty, unit, g){ return {name, key, qty, unit, g}; }
 
 const RECIPES = [
-  { id:"power-bowl", cat:"Mains & Bowls", title:"Gochujang Bulgur Power Bowl",
+  { id:"power-bowl1", cat:"Mains & Bowls", title:"Gochujang Bulgur Power Bowl",
     portions:1, anchor:2,
     ings:[
       ing("Bulgur (dry)","bulgur_dry",60,"g",60),
@@ -236,7 +236,7 @@ const RECIPES = [
     ],
     note:"Eat 2–3 hours before training so it doesn't sit heavy." },
 
-  { id:"power-bowl", cat:"Mains & Bowls", title:"Gochujang Vegetarian Salad Bowl",
+  { id:"power-bowl2", cat:"Mains & Bowls", title:"Gochujang Vegetarian Salad Bowl",
    img:"images/chickpeas_edamame_tofu_avocado_gochujang.jpg", 
    portions:1, anchor:2,
     ings:[
@@ -249,7 +249,7 @@ const RECIPES = [
       ing("Tomato, wedged","tomato",1,"ea",80),
       ing("Carrots, striped","carrots",64,"g",64),
       ing("Gochujang","gochujang",0.5,"tbsp",16),
-      ing("Chickpeas, drained","chickpeas",30,"g",30),
+      ing("Chickpeas, drained","chickpea",30,"g",30),
       ing("Soy sauce","soy",5,"tsp",5),
       ing("Honey","honey",1,"tsp",7),
       ing("Squeeze of lemon","neg",null,"",0),
@@ -306,7 +306,7 @@ const RECIPES = [
       ing("Olive oil","olive_oil",15,"ml",14),
       ing("Salt","neg",5,"g",0),
       ing("Black pepper","neg",1,"g",0),
-      ing("Parsley, chopped","parsley",15,"g",15),
+      ing("Parsley, chopped","parsley_fresh",15,"g",15),
     ],
     steps:[
       "Heat the oil and cook the onion until soft, then add the garlic and pepper for a couple of minutes.",
@@ -323,7 +323,7 @@ const RECIPES = [
     portions:4, anchor:0,
     ings:[
       ing("Lean minced beef","beef_lean",500,"g",500),
-      ing("Large high-protein wraps","wrap",4,"ea",200),
+      ing("Large high-protein wraps","highprotein_wrap",4,"ea",200),
       ing("Cheddar, grated","cheddar",120,"g",120),
       ing("Onion, finely chopped","onion",1,"ea",110),
       ing("Garlic cloves, minced","garlic",2,"clove",6),
@@ -390,7 +390,7 @@ const RECIPES = [
       ing("Hot stock","neg",500,"ml",0),
       ing("Salt","neg",1.5,"tsp",0),
       ing("Black pepper","neg",0.5,"tsp",0),
-      ing("Parsley, chopped","parsley",15,"g",15),
+      ing("Parsley, chopped","parsley_fresh",15,"g",15),
     ],
     steps:[
       "Heat oven to 200°C. Pat drumsticks dry. Mix half the oil with the spices; rub two-thirds over the drumsticks.",
@@ -405,7 +405,7 @@ const RECIPES = [
   { id:"potato-tofu-salad", cat:"Salads", title:"Warm Potato & Crispy Tofu Salad",
     portions:2, anchor:0,
     ings:[
-      ing("Boiled potatoes","potato",400,"g",400),
+      ing("Boiled potatoes","potato_raw",400,"g",400),
       ing("Firm tofu, cubed","tofu",200,"g",200),
       ing("Shelled edamame","edamame",120,"g",120),
       ing("Sweet corn","corn",120,"g",120),
@@ -503,7 +503,7 @@ const RECIPES = [
     portions:2, anchor:0,
     ings:[
       ing("Firm tofu, cubed","tofu",200,"g",200),
-      ing("Potatoes, chunked","potato",200,"g",200),
+      ing("Potatoes, chunked","potato_raw",200,"g",200),
       ing("Cauliflower florets","cauliflower",150,"g",150),
       ing("Zucchini, half-moons","zucchini",150,"g",150),
       ing("Mushrooms, sliced","mushroom",100,"g",100),
@@ -538,7 +538,7 @@ const RECIPES = [
       ing("Salt","neg",null,"",0),
       ing("Blueberries (batter)","blueberry",150,"g",150),
       ing("Blueberries (compote)","blueberry",200,"g",200),
-      ing("Lemon juice","lemon",1,"tsp",5),
+      ing("Lemon juice","lemon_juice",1,"tsp",5),
       ing("Water","neg",2,"tbsp",0),
     ],
     steps:[
@@ -561,7 +561,7 @@ const RECIPES = [
       ing("Fine salt","neg",0.25,"tsp",0),
       ing("Strong coffee, cooled","neg",200,"ml",0),
       ing("Savoiardi (ladyfingers)","ladyfinger",90,"g",90),
-      ing("Cocoa powder, to dust","cocoa",2,"tsp",4),
+      ing("Cocoa powder, to dust","cocoa_powder",2,"tsp",4),
     ],
     steps:[
       "Beat cold mascarpone with sugar, vanilla and salt until smooth, then fold in the yogurt.",
@@ -577,7 +577,7 @@ const RECIPES = [
       ing("Soft pitted dates","dates",150,"g",150),
       ing("Almonds","almond",80,"g",80),
       ing("Walnuts","walnut",40,"g",40),
-      ing("Cacao powder","cocoa",20,"g",20),
+      ing("Cacao powder","cocoa_powder",20,"g",20),
       ing("Hemp seeds","hemp",20,"g",20),
       ing("Salt","neg",null,"",0),
       ing("Firm tofu, drained","tofu",200,"g",200),
@@ -587,7 +587,7 @@ const RECIPES = [
       ing("Maple or date syrup","maple",30,"g",30),
       ing("Coconut oil, melted","coconut_oil",40,"g",40),
       ing("Vanilla protein powder","protein_powder",15,"g",15),
-      ing("Lemon juice","lemon",1,"tsp",5),
+      ing("Lemon juice","lemon_juice",1,"tsp",5),
       ing("Vanilla extract","neg",1,"tsp",0),
     ],
     steps:[
@@ -603,7 +603,8 @@ const RECIPES = [
 // Meal + season recommendation shown on the flipped card.
 // Edit any value here — the text appears verbatim after "Best as".
 const REC = {
-  "power-bowl":        "lunch in summer",
+  "power-bowl1":        "lunch in summer",
+  "power-bowl2":        "lunch in summer",
   "Gochujang-tuna":    "lunch in summer",
   "mince-pilaf":       "lunch in autumn/winter",
   "taco-wraps":        "dinner in autumn/winter",
