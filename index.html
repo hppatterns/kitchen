@@ -180,7 +180,7 @@ footer{color:#a49da8; font-size:12px; margin-top:30px; text-align:center; line-h
 
 // per 100 g: [kcal, protein, carb, fat]
 const NUT = {
-  bulgur_dry:[342,12,63.4,3.3], oat_flour:[400,13.3,60,6.7], potato_raw:[77,2.1,15.4,0.1],
+    bulgur_dry:[342,12,63.4,3.3], oat_flour:[400,13.3,60,6.7], potato_raw:[77,2.1,15.4,0.1],
   dates:[282,2.5,66.9,0.4], tofu:[126,13,0,7.9], egg:[155,12.6,1.1,10.6], canned_tuna:[98,23,0.3,0.6],
   mince_lean:[140,20,0.5,6.4], chicken_thigh_withskin:[239,28.2,0,13.2], chicken_drum_withskin:[206,27.3,0,10],
   edamame:[121,11.9,3.6,5.2], prawn:[99,24,0.2,0.3], greek_yogurt:[126,4,4.9,10.4], mascarpone:[431,2.9,4.6,45.6],
@@ -188,19 +188,20 @@ const NUT = {
   walnut:[679,14.6,5.5,69.7], hemp:[526,24.8,0,35.5], cheddar:[403,22.9,3.4,33.4], avocado:[167,2,1.8,15.4],
   zucchini:[17,1.2,2.1,0.3], onion:[40,1.1,7.7,0.1], pepper:[27,0.8,5.5,0.1], tomato:[18,0.9,2.7,0.2],
   cucumber:[14,0.6,1.7,0.2], honey:[304,0.3,81.8,0], soy_sauce:[53,8.1,4,0.6], pickled_cucumber:[7.7,0.2,1.4,0.1],
-  lettuce:[14,0.7,2.1,0.1], 
-  mushroom:[22,3,3,0.3],
-  cauliflower:[25,1.9,5,0.3], radish:[16,0.7,3.4,0.1], spring_onion:[32,1.8,7,0.2],
-  greens:[13,1.5,2,0.2], seaweed:[30,4,5,0.3], strawberry:[32,0.7,7.7,0.3],
-  strawberry_fd:[360,4,88,3], grapes:[69,0.7,18,0.2], aubergine:[25,1,6,0.2],
-  blueberry:[57,0.7,14,0.3], parsley:[36,3,6,0.8],
-  olive_oil:[884,0,0,100], oil:[884,0,0,100], sesame_oil:[884,0,0,100], coconut_oil:[862,0,0,100],
-  tomato_paste:[82,4,19,0.5], soy:[53,8,5,0], gochujang:[210,5,45,1], doenjang:[200,12,20,6],
-  miso:[198,12,26,6], maple:[260,0,67,0], sugar:[400,0,100,0], cocoa:[228,20,58,14],
-  sesame_seed:[573,17,23,50], garlic:[149,6,33,0.5], ginger:[80,1.8,18,0.8],
-  lime:[25,0.4,8,0.1], lemon:[22,0.4,7,0.1],
-  beef_lean:[137,21,0,6], ladyfinger:[400,9,75,6], wrap:[280,20,30,6],
-  shirataki:[10,0,3,0], corn:[86,3,19,1.2], peas:[81,5,14,0.4], chickpea:[130,7,20,2.5], neg:[0,0,0,0]
+  lettuce:[14,0.7,2.1,0.1], mushroom:[25,2.9,1.5,0.4],
+  cauliflower:[25,1.9,5,0.3], radish:[16,0.7,1.8,0.1], spring_onion:[21,1.8,2.7,0.2],
+  seaweed_wakame:[45,3,8.6,0.6], strawberry:[33,0.6,5.8,0.3],
+  strawberry_fd:[35,0.4,6.8,0.1], grapes:[69,0.7,17.1,0.2], aubergine:[25,1,2.8,0.2],
+  blueberry:[57,0.7,12.2,0.3], parsley_fresh:[36,3,3,0.8],
+  olive_oil:[884,0,0,100], oil:[884,0,0,100], sesame_oil:[884,0,0,100], coconut_oil:[892,0,0,100],
+  garlic:[130,6.6,25.5,0.4] , ginger:[80,1.8,18,0.8], lemon_juice:[22,0.4,6.6,0.2], lime:[25,0.4,8,0.1],
+  gochujang:[210,5.26,47.4,0], highprotein_wrap:[310,19,38,7.8], cocoa_powder:[290,23,10,11],
+  chickpea:[139,7.1,16,2.8], white_pepper:[296,10.4,42.4,2.1], flour:[343,12,68,1.1],
+  miso:[198,12,26,6], maple:[260,0,67,0], sugar:[400,0,100,0], 
+  sesame_seed:[573,17,23,50], tomato_paste:[82,4,19,0.5], soy:[53,8,5,0],
+  beef_lean:[137,21,0,6], ladyfinger:[400,9,75,6], doenjang:[200,12,20,6],
+  shirataki:[10,0,3,0], corn:[86,3,19,1.2], peas:[81,5,14,0.4], 
+  greens:[13,1.5,2,0.2] neg:[0,0,0,0]
 };
 
 // ingredient shorthand: [displayName, key, qty, unit, grams]
@@ -453,6 +454,25 @@ const RECIPES = [
     ],
     note:"Firm tofu is fine straight from the pack. Marinating the raw cauliflower and mushrooms is what makes them good." },
 
+    { id:"airfry-asianmeatball", cat:"Mains & Bowls", title:"Asian meatballs",
+    portions:5, anchor:1,
+    ings:[
+      ing("Lean minced meat","mince_lean",500,"g",500),
+      ing("Egg","egg",1,"pcs",50),
+      ing("Soy sauce","soy_sauce",1,"tbsp",16),
+      ing("Sesame oil","sesame_oil",1,"tsp",5),
+      ing("Garlic","garlic",3,"clove",9),
+      ing("Ginger","ginger",2,"cm",6),
+
+      ing("White pepper","white_pepper",0.5,"tsp",1),
+    ],
+    steps:[
+      "Combine everything in a bowl and mix until it comes together.",
+      "Roll into balls of roughly 30g, or about a heaped tablespoon.",
+      "Air fry at 180°C for 10–12 min.",
+    ],
+    note:"To store them: In airtight container in Fridge, up to 4 days. Or freeze up to 3 months. Reheat the frozen meatballs by putting into simmering soups for 5-6 mins or airfry at 180°C for 3-4 mins." },
+
   { id:"hotpot", cat:"Soups & Hot Pots", title:"Miso-Gochujang Tofu Hot Pot",
     portions:2, anchor:0,
     ings:[
@@ -589,6 +609,7 @@ const REC = {
   "taco-wraps":        "dinner in autumn/winter",
   "airfryer-thighs":   "lunch in summer",
   "drumsticks-traybake":"dinner in autumn/winter",
+  "airfry-asianmeatball":"dinner in autumn/winter",
   "potato-tofu-salad": "lunch in summer",
   "nocook-salad":      "lunch in summer",
   "hotpot":            "dinner in autumn/winter",
